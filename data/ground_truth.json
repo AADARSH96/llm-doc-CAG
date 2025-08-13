@@ -1,0 +1,6 @@
+{
+  "0": "CAG is a technique where all required reference data is preloaded into a language model’s context window, removing the need for retrieval at inference time.",
+  "1": "RAG retrieves knowledge on-the-fly from a large, dynamic corpus, while CAG uses only preloaded static context within the model’s prompt.",
+  "2": "Use CAG for small or static datasets such as policies, FAQs, or other information that fits entirely into a model’s context window.",
+  "3": "Not found in cache."
+}

@@ -1,0 +1,11 @@
+Q: What is Cache-Augmented Generation (CAG)?
+A: CAG is a technique where all required reference data is preloaded into a language model’s context window, removing the need for retrieval at inference time.
+
+Q: When should I use CAG?
+A: Use CAG for small/static corpora such as policies, FAQs, or other datasets that fit into a model’s prompt/context.
+
+Q: What are CAG’s main limitations?
+A: The cache must fit inside the model’s token limit; new information requires updating and reloading the cache.
+
+Q: How does CAG differ from RAG?
+A: RAG retrieves knowledge on-the-fly from a large, dynamic corpus, while CAG uses only the preloaded static context.
