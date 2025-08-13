@@ -21,8 +21,18 @@ def load_ground_truth(path="data/ground_truth.json"):
 def build_samples_and_modes(data, model_key, ground_truths):
     samples = []
     modes = []
-    for i, item in enumerate(data):
-        ref = ground_truths.get(str(i)) if ground_truths else None
+    question_indices = []
+
+    # Determine number of unique questions from ground truth keys (assumed continuous from 0)
+    try:
+        num_questions = len(ground_truths)
+    except:
+        num_questions = 4  # default fallback, adjust if needed
+
+    for global_i, item in enumerate(data):
+        question_idx = global_i % num_questions
+        ref = ground_truths.get(str(question_idx)) if ground_truths else None
+
         samples.append(
             SingleTurnSample(
                 user_input=item["question"],
@@ -32,16 +42,18 @@ def build_samples_and_modes(data, model_key, ground_truths):
             )
         )
         modes.append(item.get("mode", "unknown"))
-    return samples, modes
+        question_indices.append(question_idx)
 
-def save_scores_to_csv(scores, model_name, modes, filename="validation/evaluation_metrics.csv"):
-    if hasattr(scores, "to_pandas"):  # New Ragas result object
+    return samples, modes, question_indices
+
+def save_scores_to_csv(scores, model_name, modes, question_indices, filename="validation/evaluation_metrics.csv"):
+    if hasattr(scores, "to_pandas"):  # New Ragas EvaluationResult object
         df = scores.to_pandas()
     else:
         df = pd.DataFrame(scores)
 
     df.insert(0, "model", model_name)
-    df.insert(1, "sample_index", range(len(df)))
+    df.insert(1, "sample_index", question_indices)  # Assign correct question indices repeated per prompt mode
     df.insert(2, "prompt_mode", modes)
 
     if os.path.exists(filename) and os.path.getsize(filename) > 0:
@@ -55,24 +67,25 @@ def main():
     data = load_data()
     ground_truths = load_ground_truth()
 
-    # Require complete references for context_recall / answer_correctness
-    if ground_truths and all(ground_truths.get(str(i)) for i in range(len(data))):
+    # Only run all metrics if ground truth references exist and are non-empty for *all* question indices
+    if ground_truths and all(ground_truths.get(str(i)) for i in range(len(ground_truths))):
         metrics = [faithfulness, context_recall, answer_correctness]
         print("📏 Full metric set: faithfulness, context_recall, answer_correctness")
     else:
         metrics = [faithfulness]
-        print("📏 Limited metric set: faithfulness only")
+        print("📏 Limited metric set: faithfulness only (missing or incomplete ground truths)")
 
     csv_file = "validation/evaluation_metrics.csv"
+    # Clear previous CSV to avoid duplication
     with open(csv_file, "w") as f:
         f.write("")
 
     for model_key in ["chatgpt_answer", "claude_answer"]:
         print(f"\n🔍 Evaluating model: {model_key}")
-        samples, modes = build_samples_and_modes(data, model_key, ground_truths)
+        samples, modes, question_indices = build_samples_and_modes(data, model_key, ground_truths)
         dataset = EvaluationDataset(samples)
         scores = evaluate(dataset=dataset, metrics=metrics)
-        save_scores_to_csv(scores, model_key, modes, csv_file)
+        save_scores_to_csv(scores, model_key, modes, question_indices, csv_file)
 
 if __name__ == "__main__":
     main()
