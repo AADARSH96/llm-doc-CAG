@@ -3,12 +3,12 @@ import json
 from openai import OpenAI
 import time
 
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='')
 import anthropic
 from prompts import PROMPT_TEMPLATES
 
  #os.environ.get("OPENAI_API_KEY")
-claude_client =  anthropic.Anthropic(api_key='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')
+claude_client =  anthropic.Anthropic(api_key='')
 
 def load_cache(path="data/cache_knowledge.txt"):
     with open(path, encoding="utf-8") as f:
