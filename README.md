@@ -1,5 +1,5 @@
 
-```markdown
+
 # Cache‑Augmented Generation (CAG) — Model Comparison and Evaluation
 
 This project runs controlled, side‑by‑side comparisons of **OpenAI ChatGPT** and **Anthropic Claude** using **Cache‑Augmented Generation (CAG)** with multiple prompt engineering techniques.  
@@ -9,7 +9,6 @@ It evaluates their answers using **Ragas metrics** and produces visualizations t
 
 ## 📂 Project Structure
 
-```
 
 ```
 📦 
